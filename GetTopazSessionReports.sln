@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27130.2003
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetTopazSessionReports", "GetTopazSessionReports\GetTopazSessionReports.csproj", "{14B64F5D-9D04-405E-82DE-F5E46F321FDB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetTopazSessionReportsOffice", "GetTopazSessionReportsOffice\GetTopazSessionReportsOffice.csproj", "{AAB76E9F-ADA2-4824-8E9D-4FB65BB36C1C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{14B64F5D-9D04-405E-82DE-F5E46F321FDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14B64F5D-9D04-405E-82DE-F5E46F321FDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{14B64F5D-9D04-405E-82DE-F5E46F321FDB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AAB76E9F-ADA2-4824-8E9D-4FB65BB36C1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAB76E9F-ADA2-4824-8E9D-4FB65BB36C1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAB76E9F-ADA2-4824-8E9D-4FB65BB36C1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAB76E9F-ADA2-4824-8E9D-4FB65BB36C1C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
