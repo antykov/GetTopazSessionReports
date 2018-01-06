@@ -15,6 +15,8 @@ namespace GetTopazSessionReportsOffice
         public string FtpLogin;
         [XmlElement]
         public string FtpPassword;
+        [XmlElement]
+        public string FtpPath;
 
         [XmlElement]
         public string DownloadPath;
@@ -27,6 +29,7 @@ namespace GetTopazSessionReportsOffice
     public static class AppSettings
     {
         public static Settings settings = new Settings();
+        public static bool isCreated = false;
 
         public static void LoadSettings()
         {
@@ -85,9 +88,10 @@ namespace GetTopazSessionReportsOffice
 
             Settings templateSettings = new Settings
             {
-                FtpHost = "files.000webhost.com",
-                FtpLogin = "progasvrn",
+                FtpHost = "ftp.byethost10.com",
+                FtpLogin = "b10_21356595",
                 FtpPassword = "Tuypeor2017ihv",
+                FtpPath = "/htdocs/",
                 DownloadPath = Environment.CurrentDirectory
             };
 
@@ -95,6 +99,8 @@ namespace GetTopazSessionReportsOffice
             {
                 xmlSerializer.Serialize(xmlWriter, templateSettings);
             }
+
+            isCreated = true;
         }
     }
 

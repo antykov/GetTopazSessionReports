@@ -24,12 +24,13 @@ namespace GetTopazSessionReports
         internal delegate int PointerToMethodInvoker();
 
         bool CanClose = false;
+        bool IsOkPressed = false;
 
         public MainForm()
+
         {
             InitializeComponent();
         }
-
         private void MainForm_Load(object sender, EventArgs e)
         {
             if (!CheckIBProvider())
@@ -41,13 +42,13 @@ namespace GetTopazSessionReports
 
             AppSettings.LoadSettings();
 
-            if (!AppSettings.CheckSettings())
+            if (!AppSettings.CheckSettings() || AppSettings.isCreated)
             {
                 notifyIcon.ShowBalloonTip(3000, "Получение отчетов Топаз", "Проверьте заполнение настроек!", ToolTipIcon.Error);
             }
             else
             {
-                WindowState = FormWindowState.Minimized;
+                Hide();
                 ShowInTaskbar = false;
 
                 GetSessionReports();
@@ -61,17 +62,20 @@ namespace GetTopazSessionReports
             if (!CanClose)
             {
                 e.Cancel = true;
-                WindowState = FormWindowState.Minimized;
+                Hide();
                 ShowInTaskbar = false;
                 timer.Enabled = true;
 
-                GetSessionReports();
+                if (IsOkPressed)
+                    GetSessionReports();
             }
+
+            IsOkPressed = false;
         }
 
         private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            WindowState = FormWindowState.Normal;
+            Show();
             ShowInTaskbar = true;
             timer.Enabled = false;
 
@@ -87,6 +91,19 @@ namespace GetTopazSessionReports
 
         private void buttonOk_Click(object sender, EventArgs e)
         {
+            int lastSession = 0;
+            if (!int.TryParse(LastSession.Text, out lastSession))
+            {
+                MessageBox.Show("Номер смены должен быть числом!", "Внимание!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (StartDate.Value != StartDateLocal.Value && lastSession == 0)
+            {
+                MessageBox.Show("Если начальные даты различаются, то необходимо указать начальный номер выгружаемой смены!", "Внимание!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             AppSettings.settings.FirebirdServerName = FirebirdServerName.Text;
             AppSettings.settings.FirebirdUserName = FirebirdUserName.Text;
             AppSettings.settings.FirebirdPassword = FirebirdPassword.Text;
@@ -94,13 +111,16 @@ namespace GetTopazSessionReports
             AppSettings.settings.FtpHost = FtpHost.Text;
             AppSettings.settings.FtpLogin = FtpLogin.Text;
             AppSettings.settings.FtpPassword = FtpPassword.Text;
+            AppSettings.settings.FtpPath = FtpPath.Text;
             AppSettings.settings.StartDate = StartDate.Value;
-
-            int lastSession = 0;
-            if (int.TryParse(LastSession.Text, out lastSession))
-                AppSettings.settings.LastSession = lastSession;
+            AppSettings.settings.StartDateLocal = StartDateLocal.Value;
+            AppSettings.settings.LastSession = lastSession;
 
             AppSettings.SaveSettings();
+
+            AppSettings.isCreated = false;
+
+            IsOkPressed = true;
 
             Close();
         }
@@ -129,7 +149,9 @@ namespace GetTopazSessionReports
             FtpHost.Text = AppSettings.settings.FtpHost;
             FtpLogin.Text = AppSettings.settings.FtpLogin;
             FtpPassword.Text = AppSettings.settings.FtpPassword;
+            FtpPath.Text = AppSettings.settings.FtpPath;
             StartDate.Value = AppSettings.settings.StartDate;
+            StartDateLocal.Value = AppSettings.settings.StartDateLocal;
             LastSession.Text = AppSettings.settings.LastSession.ToString();
         }
 
@@ -140,6 +162,8 @@ namespace GetTopazSessionReports
                 List<long> sessions = GetSessionsForUpload();
                 if (sessions.Count == 0)
                     return;
+
+                CheckCreateFtpDirectory();
 
                 foreach (long id in sessions)
                 {
@@ -182,7 +206,7 @@ namespace GetTopazSessionReports
                           ORDER BY ""SessionID""";
 
                     var query = new OleDbCommand(sql, connection);
-                    query["StartDateTime"].Value = AppSettings.settings.StartDate;
+                    query["StartDateTime"].Value = AppSettings.settings.StartDateLocal;
                     query["LastSession"].Value = AppSettings.settings.LastSession;
 
                     using (var reader = query.ExecuteReader())
@@ -227,7 +251,7 @@ namespace GetTopazSessionReports
                 }
             }
 
-            string xmlFileName = Path.Combine(Path.GetTempPath(), $"SessionReport-{azsCode}-{sessionDateTime}-{id}.xml");
+            string xmlFileName = Path.Combine(Path.GetTempPath(), $"SessionReport-{sessionDateTime}-AZS{azsCode.PadLeft(3, '0')}-N{id.ToString().PadLeft(4, '0')}.xml");
             File.Delete(xmlFileName);
             File.Move(fileName, xmlFileName);
 
@@ -257,17 +281,25 @@ namespace GetTopazSessionReports
                     throw new Exception($"Отсутствует информация по смене с ID = {id}!");
 
                 azsCode = reader.GetValue(4).ToString();
-                sessionDateTime = ((DateTime)(reader.GetValue(2))).ToString("yyyyMMddhhmmss");
+
+                DateTime startDateTimeLocal = (DateTime)(reader.GetValue(2));
+                DateTime startDateTime = startDateTimeLocal + (AppSettings.settings.StartDate - AppSettings.settings.StartDateLocal);
+                DateTime endDateTimeLocal = (DateTime)(reader.GetValue(3));
+                DateTime endDateTime = endDateTimeLocal + (AppSettings.settings.StartDate - AppSettings.settings.StartDateLocal);
+                sessionDateTime = startDateTime.ToString("yyyy-MM-dd");
 
                 writer.WriteStartElement("DataPaket");
                 writer.WriteAttributeString("AZSCode", azsCode);
+                writer.WriteAttributeString("AZSName", reader.GetValue(5).ToString());
 
                 writer.WriteStartElement("Sessions");
 
                 writer.WriteStartElement("Session");
                 writer.WriteAttributeString("UserName", reader.GetValue(1).ToString());
-                writer.WriteAttributeString("StartDateTime", ((DateTime)(reader.GetValue(2))).ToString("dd.MM.yyyy hh:mm:ss"));
-                writer.WriteAttributeString("EndDateTime", ((DateTime)(reader.GetValue(3))).ToString("dd.MM.yyyy hh:mm:ss"));
+                writer.WriteAttributeString("StartDateTime", startDateTime.ToString("dd.MM.yyyy hh:mm:ss"));
+                writer.WriteAttributeString("StartDateTimeLocal", startDateTimeLocal.ToString("dd.MM.yyyy hh:mm:ss"));
+                writer.WriteAttributeString("EndDateTime", endDateTime.ToString("dd.MM.yyyy hh:mm:ss"));
+                writer.WriteAttributeString("EndDateTimeLocal", endDateTimeLocal.ToString("dd.MM.yyyy hh:mm:ss"));
                 writer.WriteAttributeString("SessionNum", reader.GetValue(0).ToString());
             }
         }
@@ -391,9 +423,7 @@ namespace GetTopazSessionReports
 
         private void UploadSessionReportToFtp(string sessionReportFileName)
         {
-            CheckCreateFtpDirectory("TopazReports");
-
-            FtpWebRequest ftp = (FtpWebRequest)WebRequest.Create($"ftp://{AppSettings.settings.FtpHost}/TopazReports/{Path.GetFileName(sessionReportFileName)}");
+            FtpWebRequest ftp = (FtpWebRequest)WebRequest.Create($"ftp://{AppSettings.settings.FtpHost}{AppSettings.settings.FtpPath}TopazReports/{Path.GetFileName(sessionReportFileName)}");
             ftp.Credentials = new NetworkCredential(AppSettings.settings.FtpLogin, AppSettings.settings.FtpPassword);
             ftp.Method = WebRequestMethods.Ftp.UploadFile;
 
@@ -412,9 +442,9 @@ namespace GetTopazSessionReports
             }
         }
 
-        private void CheckCreateFtpDirectory(string ftpPath)
+        private void CheckCreateFtpDirectory()
         {
-            FtpWebRequest ftp = (FtpWebRequest)WebRequest.Create($"ftp://{AppSettings.settings.FtpHost}");
+            FtpWebRequest ftp = (FtpWebRequest)WebRequest.Create($"ftp://{AppSettings.settings.FtpHost}{AppSettings.settings.FtpPath}");
             ftp.Credentials = new NetworkCredential(AppSettings.settings.FtpLogin, AppSettings.settings.FtpPassword);
             ftp.Method = WebRequestMethods.Ftp.ListDirectory;
 
@@ -428,7 +458,7 @@ namespace GetTopazSessionReports
                     {
                         while (!reader.EndOfStream)
                         {
-                            if (reader.ReadLine().ToUpper() == ftpPath.ToUpper())
+                            if (reader.ReadLine().ToUpper() == "TOPAZREPORTS")
                             {
                                 ftpPathExists = true;
                                 break;
@@ -441,7 +471,7 @@ namespace GetTopazSessionReports
             if (ftpPathExists)
                 return;
 
-            ftp = (FtpWebRequest)WebRequest.Create($"ftp://{AppSettings.settings.FtpHost}/{ftpPath}");
+            ftp = (FtpWebRequest)WebRequest.Create($"ftp://{AppSettings.settings.FtpHost}/{AppSettings.settings.FtpPath}TopazReports");
             ftp.Credentials = new NetworkCredential(AppSettings.settings.FtpLogin, AppSettings.settings.FtpPassword);
             ftp.Method = WebRequestMethods.Ftp.MakeDirectory;
             ftp.GetResponse();

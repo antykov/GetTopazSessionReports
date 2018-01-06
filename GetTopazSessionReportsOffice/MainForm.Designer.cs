@@ -43,17 +43,21 @@
             this.buttonOk = new System.Windows.Forms.Button();
             this.timer = new System.Windows.Forms.Timer(this.components);
             this.contextMenuNotifyIcon = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.menuItemDownloadReports = new System.Windows.Forms.ToolStripMenuItem();
             this.menuItemExit = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
-            this.menuItemDownloadReports = new System.Windows.Forms.ToolStripMenuItem();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.buttonSelectFolder = new System.Windows.Forms.Button();
+            this.labelFtpPath = new System.Windows.Forms.Label();
+            this.FtpPath = new System.Windows.Forms.TextBox();
             this.groupBoxFtp.SuspendLayout();
             this.contextMenuNotifyIcon.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBoxFtp
             // 
+            this.groupBoxFtp.Controls.Add(this.labelFtpPath);
+            this.groupBoxFtp.Controls.Add(this.FtpPath);
             this.groupBoxFtp.Controls.Add(this.labelFtpPassword);
             this.groupBoxFtp.Controls.Add(this.FtpPassword);
             this.groupBoxFtp.Controls.Add(this.labelFtpLogin);
@@ -62,7 +66,7 @@
             this.groupBoxFtp.Controls.Add(this.FtpHost);
             this.groupBoxFtp.Location = new System.Drawing.Point(12, 12);
             this.groupBoxFtp.Name = "groupBoxFtp";
-            this.groupBoxFtp.Size = new System.Drawing.Size(489, 51);
+            this.groupBoxFtp.Size = new System.Drawing.Size(489, 77);
             this.groupBoxFtp.TabIndex = 5;
             this.groupBoxFtp.TabStop = false;
             this.groupBoxFtp.Text = "Настройка Ftp";
@@ -80,6 +84,7 @@
             // 
             this.FtpPassword.Location = new System.Drawing.Point(399, 19);
             this.FtpPassword.Name = "FtpPassword";
+            this.FtpPassword.PasswordChar = '*';
             this.FtpPassword.Size = new System.Drawing.Size(78, 20);
             this.FtpPassword.TabIndex = 11;
             // 
@@ -118,7 +123,7 @@
             // labelDownloadPath
             // 
             this.labelDownloadPath.AutoSize = true;
-            this.labelDownloadPath.Location = new System.Drawing.Point(18, 72);
+            this.labelDownloadPath.Location = new System.Drawing.Point(18, 99);
             this.labelDownloadPath.Name = "labelDownloadPath";
             this.labelDownloadPath.Size = new System.Drawing.Size(51, 13);
             this.labelDownloadPath.TabIndex = 10;
@@ -127,7 +132,7 @@
             // DownloadPath
             // 
             this.DownloadPath.Enabled = false;
-            this.DownloadPath.Location = new System.Drawing.Point(101, 69);
+            this.DownloadPath.Location = new System.Drawing.Point(101, 96);
             this.DownloadPath.Name = "DownloadPath";
             this.DownloadPath.Size = new System.Drawing.Size(376, 20);
             this.DownloadPath.TabIndex = 9;
@@ -135,7 +140,7 @@
             // buttonCancel
             // 
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(426, 95);
+            this.buttonCancel.Location = new System.Drawing.Point(426, 122);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
             this.buttonCancel.TabIndex = 17;
@@ -146,7 +151,7 @@
             // buttonOk
             // 
             this.buttonOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.buttonOk.Location = new System.Drawing.Point(345, 95);
+            this.buttonOk.Location = new System.Drawing.Point(345, 122);
             this.buttonOk.Name = "buttonOk";
             this.buttonOk.Size = new System.Drawing.Size(75, 23);
             this.buttonOk.TabIndex = 16;
@@ -167,6 +172,13 @@
             this.contextMenuNotifyIcon.Name = "contextMenuNotifyIcon";
             this.contextMenuNotifyIcon.Size = new System.Drawing.Size(214, 48);
             // 
+            // menuItemDownloadReports
+            // 
+            this.menuItemDownloadReports.Name = "menuItemDownloadReports";
+            this.menuItemDownloadReports.Size = new System.Drawing.Size(213, 22);
+            this.menuItemDownloadReports.Text = "Скачать сменные отчеты";
+            this.menuItemDownloadReports.Click += new System.EventHandler(this.menuItemDownloadReports_Click);
+            // 
             // menuItemExit
             // 
             this.menuItemExit.Name = "menuItemExit";
@@ -182,16 +194,9 @@
             this.notifyIcon.Visible = true;
             this.notifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseDoubleClick);
             // 
-            // menuItemDownloadReports
-            // 
-            this.menuItemDownloadReports.Name = "menuItemDownloadReports";
-            this.menuItemDownloadReports.Size = new System.Drawing.Size(213, 22);
-            this.menuItemDownloadReports.Text = "Скачать сменные отчеты";
-            this.menuItemDownloadReports.Click += new System.EventHandler(this.menuItemDownloadReports_Click);
-            // 
             // buttonSelectFolder
             // 
-            this.buttonSelectFolder.Location = new System.Drawing.Point(477, 68);
+            this.buttonSelectFolder.Location = new System.Drawing.Point(477, 95);
             this.buttonSelectFolder.Name = "buttonSelectFolder";
             this.buttonSelectFolder.Size = new System.Drawing.Size(24, 22);
             this.buttonSelectFolder.TabIndex = 18;
@@ -199,11 +204,27 @@
             this.buttonSelectFolder.UseVisualStyleBackColor = true;
             this.buttonSelectFolder.Click += new System.EventHandler(this.buttonSelectFolder_Click);
             // 
+            // labelFtpPath
+            // 
+            this.labelFtpPath.AutoSize = true;
+            this.labelFtpPath.Location = new System.Drawing.Point(6, 50);
+            this.labelFtpPath.Name = "labelFtpPath";
+            this.labelFtpPath.Size = new System.Drawing.Size(51, 13);
+            this.labelFtpPath.TabIndex = 14;
+            this.labelFtpPath.Text = "Каталог:";
+            // 
+            // FtpPath
+            // 
+            this.FtpPath.Location = new System.Drawing.Point(89, 47);
+            this.FtpPath.Name = "FtpPath";
+            this.FtpPath.Size = new System.Drawing.Size(388, 20);
+            this.FtpPath.TabIndex = 13;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(510, 125);
+            this.ClientSize = new System.Drawing.Size(510, 151);
             this.Controls.Add(this.buttonSelectFolder);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonOk);
@@ -245,6 +266,8 @@
         private System.Windows.Forms.ToolStripMenuItem menuItemDownloadReports;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog;
         private System.Windows.Forms.Button buttonSelectFolder;
+        private System.Windows.Forms.Label labelFtpPath;
+        private System.Windows.Forms.TextBox FtpPath;
     }
 }
 

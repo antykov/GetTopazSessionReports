@@ -24,9 +24,13 @@ namespace GetTopazSessionReports
         public string FtpLogin;
         [XmlElement]
         public string FtpPassword;
+        [XmlElement]
+        public string FtpPath;
 
         [XmlElement]
         public DateTime StartDate;
+        [XmlElement]
+        public DateTime StartDateLocal;
         [XmlElement]
         public long LastSession;
 
@@ -38,6 +42,7 @@ namespace GetTopazSessionReports
     public static class AppSettings
     {
         public static Settings settings = new Settings();
+        public static bool isCreated = false;
 
         public static string connectionString { get {
                 StringBuilder result = new StringBuilder();
@@ -122,10 +127,12 @@ namespace GetTopazSessionReports
                 FirebirdDatabaseFile = File.Exists(topazFile) ? topazFile : "",
                 FirebirdUserName = "SYSDBA",
                 FirebirdPassword = "electro",
-                FtpHost = "files.000webhost.com",
-                FtpLogin = "progasvrn",
+                FtpHost = "ftp.byethost10.com",
+                FtpLogin = "b10_21356595",
                 FtpPassword = "Tuypeor2017ihv",
-                StartDate = new DateTime(2017, 12, 1),
+                FtpPath = "/htdocs/",
+                StartDate = new DateTime(2018, 1, 1),
+                StartDateLocal = new DateTime(2018, 1, 1),
                 LastSession = 0
             };
 
@@ -133,6 +140,8 @@ namespace GetTopazSessionReports
             {
                 xmlSerializer.Serialize(xmlWriter, templateSettings);
             }
+
+            isCreated = true;
         }
     }
 

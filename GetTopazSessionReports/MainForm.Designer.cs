@@ -56,6 +56,10 @@
             this.buttonOk = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.timer = new System.Windows.Forms.Timer(this.components);
+            this.StartDateLocal = new System.Windows.Forms.DateTimePicker();
+            this.labelstartDateLocal = new System.Windows.Forms.Label();
+            this.labelFtpPath = new System.Windows.Forms.Label();
+            this.FtpPath = new System.Windows.Forms.TextBox();
             this.contextMenuNotifyIcon.SuspendLayout();
             this.groupBoxFirebird.SuspendLayout();
             this.groupBoxFtp.SuspendLayout();
@@ -145,6 +149,7 @@
             // 
             this.FirebirdPassword.Location = new System.Drawing.Point(399, 19);
             this.FirebirdPassword.Name = "FirebirdPassword";
+            this.FirebirdPassword.PasswordChar = '*';
             this.FirebirdPassword.Size = new System.Drawing.Size(78, 20);
             this.FirebirdPassword.TabIndex = 5;
             // 
@@ -166,6 +171,8 @@
             // 
             // groupBoxFtp
             // 
+            this.groupBoxFtp.Controls.Add(this.labelFtpPath);
+            this.groupBoxFtp.Controls.Add(this.FtpPath);
             this.groupBoxFtp.Controls.Add(this.labelFtpPassword);
             this.groupBoxFtp.Controls.Add(this.FtpPassword);
             this.groupBoxFtp.Controls.Add(this.labelFtpLogin);
@@ -174,7 +181,7 @@
             this.groupBoxFtp.Controls.Add(this.FtpHost);
             this.groupBoxFtp.Location = new System.Drawing.Point(12, 94);
             this.groupBoxFtp.Name = "groupBoxFtp";
-            this.groupBoxFtp.Size = new System.Drawing.Size(489, 51);
+            this.groupBoxFtp.Size = new System.Drawing.Size(489, 76);
             this.groupBoxFtp.TabIndex = 4;
             this.groupBoxFtp.TabStop = false;
             this.groupBoxFtp.Text = "Настройка Ftp";
@@ -192,6 +199,7 @@
             // 
             this.FtpPassword.Location = new System.Drawing.Point(399, 19);
             this.FtpPassword.Name = "FtpPassword";
+            this.FtpPassword.PasswordChar = '*';
             this.FtpPassword.Size = new System.Drawing.Size(78, 20);
             this.FtpPassword.TabIndex = 11;
             // 
@@ -230,7 +238,7 @@
             // labelStartDate
             // 
             this.labelStartDate.AutoSize = true;
-            this.labelStartDate.Location = new System.Drawing.Point(18, 154);
+            this.labelStartDate.Location = new System.Drawing.Point(18, 180);
             this.labelStartDate.Name = "labelStartDate";
             this.labelStartDate.Size = new System.Drawing.Size(58, 13);
             this.labelStartDate.TabIndex = 10;
@@ -238,7 +246,7 @@
             // 
             // StartDate
             // 
-            this.StartDate.Location = new System.Drawing.Point(101, 154);
+            this.StartDate.Location = new System.Drawing.Point(101, 177);
             this.StartDate.Name = "StartDate";
             this.StartDate.Size = new System.Drawing.Size(121, 20);
             this.StartDate.TabIndex = 11;
@@ -246,7 +254,7 @@
             // labelLastSession
             // 
             this.labelLastSession.AutoSize = true;
-            this.labelLastSession.Location = new System.Drawing.Point(18, 183);
+            this.labelLastSession.Location = new System.Drawing.Point(18, 206);
             this.labelLastSession.Name = "labelLastSession";
             this.labelLastSession.Size = new System.Drawing.Size(74, 13);
             this.labelLastSession.TabIndex = 13;
@@ -254,7 +262,7 @@
             // 
             // LastSession
             // 
-            this.LastSession.Location = new System.Drawing.Point(101, 180);
+            this.LastSession.Location = new System.Drawing.Point(101, 203);
             this.LastSession.Name = "LastSession";
             this.LastSession.Size = new System.Drawing.Size(121, 20);
             this.LastSession.TabIndex = 12;
@@ -262,7 +270,7 @@
             // buttonOk
             // 
             this.buttonOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.buttonOk.Location = new System.Drawing.Point(345, 205);
+            this.buttonOk.Location = new System.Drawing.Point(345, 225);
             this.buttonOk.Name = "buttonOk";
             this.buttonOk.Size = new System.Drawing.Size(75, 23);
             this.buttonOk.TabIndex = 14;
@@ -273,7 +281,7 @@
             // buttonCancel
             // 
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(426, 205);
+            this.buttonCancel.Location = new System.Drawing.Point(426, 225);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
             this.buttonCancel.TabIndex = 15;
@@ -286,11 +294,45 @@
             this.timer.Interval = 1800000;
             this.timer.Tick += new System.EventHandler(this.timer_Tick);
             // 
+            // StartDateLocal
+            // 
+            this.StartDateLocal.Location = new System.Drawing.Point(300, 177);
+            this.StartDateLocal.Name = "StartDateLocal";
+            this.StartDateLocal.Size = new System.Drawing.Size(121, 20);
+            this.StartDateLocal.TabIndex = 17;
+            // 
+            // labelstartDateLocal
+            // 
+            this.labelstartDateLocal.AutoSize = true;
+            this.labelstartDateLocal.Location = new System.Drawing.Point(230, 175);
+            this.labelstartDateLocal.Name = "labelstartDateLocal";
+            this.labelstartDateLocal.Size = new System.Drawing.Size(64, 26);
+            this.labelstartDateLocal.TabIndex = 16;
+            this.labelstartDateLocal.Text = "Нач. дата\r\nлокальная:";
+            // 
+            // labelFtpPath
+            // 
+            this.labelFtpPath.AutoSize = true;
+            this.labelFtpPath.Location = new System.Drawing.Point(6, 49);
+            this.labelFtpPath.Name = "labelFtpPath";
+            this.labelFtpPath.Size = new System.Drawing.Size(51, 13);
+            this.labelFtpPath.TabIndex = 14;
+            this.labelFtpPath.Text = "Каталог:";
+            // 
+            // FtpPath
+            // 
+            this.FtpPath.Location = new System.Drawing.Point(89, 46);
+            this.FtpPath.Name = "FtpPath";
+            this.FtpPath.Size = new System.Drawing.Size(388, 20);
+            this.FtpPath.TabIndex = 13;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(514, 235);
+            this.ClientSize = new System.Drawing.Size(514, 254);
+            this.Controls.Add(this.StartDateLocal);
+            this.Controls.Add(this.labelstartDateLocal);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonOk);
             this.Controls.Add(this.labelLastSession);
@@ -345,6 +387,10 @@
         private System.Windows.Forms.Button buttonOk;
         private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.Timer timer;
+        private System.Windows.Forms.Label labelFtpPath;
+        private System.Windows.Forms.TextBox FtpPath;
+        private System.Windows.Forms.DateTimePicker StartDateLocal;
+        private System.Windows.Forms.Label labelstartDateLocal;
     }
 }
 

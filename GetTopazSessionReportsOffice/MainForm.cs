@@ -15,6 +15,7 @@ namespace GetTopazSessionReportsOffice
     public partial class MainForm : Form
     {
         bool CanClose = false;
+        bool IsOkPressed = false;
 
         public MainForm()
         {
@@ -25,13 +26,13 @@ namespace GetTopazSessionReportsOffice
         {
             AppSettings.LoadSettings();
 
-            if (!AppSettings.CheckSettings())
+            if (!AppSettings.CheckSettings() || AppSettings.isCreated)
             {
                 notifyIcon.ShowBalloonTip(3000, "Получение отчетов Топаз", "Проверьте заполнение настроек!", ToolTipIcon.Error);
             }
             else
             {
-                WindowState = FormWindowState.Minimized;
+                Hide();
                 ShowInTaskbar = false;
 
                 GetSessionReports();
@@ -46,17 +47,20 @@ namespace GetTopazSessionReportsOffice
             if (!CanClose)
             {
                 e.Cancel = true;
-                WindowState = FormWindowState.Minimized;
+                Hide();
                 ShowInTaskbar = false;
                 timer.Enabled = true;
 
-                GetSessionReports();
+                if (IsOkPressed)
+                    GetSessionReports();
             }
+
+            IsOkPressed = false;
         }
 
         private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            WindowState = FormWindowState.Normal;
+            Show();
             ShowInTaskbar = true;
             timer.Enabled = false;
 
@@ -87,9 +91,14 @@ namespace GetTopazSessionReportsOffice
             AppSettings.settings.FtpHost = FtpHost.Text;
             AppSettings.settings.FtpLogin = FtpLogin.Text;
             AppSettings.settings.FtpPassword = FtpPassword.Text;
+            AppSettings.settings.FtpPath = FtpPath.Text;
             AppSettings.settings.DownloadPath = DownloadPath.Text;
 
             AppSettings.SaveSettings();
+
+            AppSettings.isCreated = false;
+
+            IsOkPressed = true;
 
             Close();
         }
@@ -123,6 +132,7 @@ namespace GetTopazSessionReportsOffice
             FtpHost.Text = AppSettings.settings.FtpHost;
             FtpLogin.Text = AppSettings.settings.FtpLogin;
             FtpPassword.Text = AppSettings.settings.FtpPassword;
+            FtpPath.Text = AppSettings.settings.FtpPath;
             DownloadPath.Text = AppSettings.settings.DownloadPath;
         }
 
@@ -134,7 +144,7 @@ namespace GetTopazSessionReportsOffice
 
             try
             {
-                ftpFiles = ListFtpDirectory("/TopazReports/")
+                ftpFiles = ListFtpDirectory("TopazReports/")
                     .Select(s => new { fileName = s, fileNameUpper = s.ToUpper() })
                     .Where(w => w.fileNameUpper.Length > 4 && w.fileNameUpper.Substring(w.fileNameUpper.Length - 4) == ".XML")
                     .Select(s => s.fileName)
@@ -150,8 +160,8 @@ namespace GetTopazSessionReportsOffice
             {
                 try
                 {
-                    DownloadFileFromFtp("/TopazReports/", file, AppSettings.settings.DownloadPath);
-                    DeleteFileFromFtp("/TopazReports/", file);
+                    DownloadFileFromFtp("TopazReports/", file, AppSettings.settings.DownloadPath);
+                    DeleteFileFromFtp("TopazReports/", file);
                 }
                 catch (Exception e)
                 {
@@ -170,7 +180,8 @@ namespace GetTopazSessionReportsOffice
             StringBuilder uri = new StringBuilder();
             uri.Append("ftp://");
             uri.Append(AppSettings.settings.FtpHost);
-            uri.Append(String.IsNullOrWhiteSpace(ftpPath) ? "/" : ftpPath);
+            uri.Append(AppSettings.settings.FtpPath);
+            uri.Append(String.IsNullOrWhiteSpace(AppSettings.settings.FtpPath) ? "/" : ftpPath);
 
             FtpWebRequest ftp = (FtpWebRequest)WebRequest.Create(uri.ToString());
             ftp.Credentials = new NetworkCredential(AppSettings.settings.FtpLogin, AppSettings.settings.FtpPassword);
@@ -198,7 +209,8 @@ namespace GetTopazSessionReportsOffice
             StringBuilder uri = new StringBuilder();
             uri.Append("ftp://");
             uri.Append(AppSettings.settings.FtpHost);
-            uri.Append(String.IsNullOrWhiteSpace(ftpDirectory) ? "/" : ftpDirectory);
+            uri.Append(AppSettings.settings.FtpPath);
+            uri.Append(String.IsNullOrWhiteSpace(AppSettings.settings.FtpPath) ? "/" : ftpDirectory);
             uri.Append(Path.GetFileName(ftpFileName));
 
             FtpWebRequest ftp = (FtpWebRequest)WebRequest.Create(uri.ToString());
@@ -224,7 +236,8 @@ namespace GetTopazSessionReportsOffice
             StringBuilder uri = new StringBuilder();
             uri.Append("ftp://");
             uri.Append(AppSettings.settings.FtpHost);
-            uri.Append(String.IsNullOrWhiteSpace(ftpDirectory) ? "/" : ftpDirectory);
+            uri.Append(AppSettings.settings.FtpPath);
+            uri.Append(String.IsNullOrWhiteSpace(AppSettings.settings.FtpPath) ? "/" : ftpDirectory);
             uri.Append(Path.GetFileName(ftpFileName));
 
             FtpWebRequest ftp = (FtpWebRequest)WebRequest.Create(uri.ToString());
