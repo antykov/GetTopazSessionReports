@@ -44,7 +44,7 @@ namespace GetTopazSessionReportsOffice
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (!CanClose)
+            if (!CanClose && e.CloseReason != CloseReason.WindowsShutDown)
             {
                 e.Cancel = true;
                 Hide();
