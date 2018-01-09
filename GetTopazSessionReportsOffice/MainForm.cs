@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GetTopazSessionReportsOffice
@@ -19,6 +16,8 @@ namespace GetTopazSessionReportsOffice
 
         public MainForm()
         {
+            Program.logger.Trace("Запуск!");
+
             InitializeComponent();
         }
 
@@ -53,6 +52,9 @@ namespace GetTopazSessionReportsOffice
 
                 if (IsOkPressed)
                     GetSessionReports();
+            } else
+            {
+                Program.logger.Trace("Завершение!");
             }
 
             IsOkPressed = false;
@@ -142,6 +144,8 @@ namespace GetTopazSessionReportsOffice
 
             List<string> ftpFiles;
 
+            Program.logger.Trace("Запуск процесса получения сменных отчетов!");
+
             try
             {
                 ftpFiles = ListFtpDirectory("TopazReports/")
@@ -152,6 +156,7 @@ namespace GetTopazSessionReportsOffice
             }
             catch (Exception e)
             {
+                Program.logger.Error(e, "Ошибка чтения файлов с ftp");
                 notifyIcon.ShowBalloonTip(3000, "Ошибка чтения файлов с ftp!", e.Message, ToolTipIcon.Error);
                 return false;
             }
@@ -161,10 +166,14 @@ namespace GetTopazSessionReportsOffice
                 try
                 {
                     DownloadFileFromFtp("TopazReports/", file, AppSettings.settings.DownloadPath);
-                    DeleteFileFromFtp("TopazReports/", file);
+                    #if !DEBUG
+                        DeleteFileFromFtp("TopazReports/", file);
+                    #endif
+                    Program.logger.Trace($"Скачивание файла {file} завершено!");
                 }
                 catch (Exception e)
                 {
+                    Program.logger.Error(e, $"Ошибка скачивания файла {file}");
                     notifyIcon.ShowBalloonTip(3000, $"Ошибка скачивания файла {file}!", e.Message, ToolTipIcon.Error);
                     result = false;
                 }

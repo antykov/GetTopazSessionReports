@@ -27,10 +27,12 @@ namespace GetTopazSessionReports
         bool IsOkPressed = false;
 
         public MainForm()
-
         {
+            Program.logger.Trace("Запуск!");
+
             InitializeComponent();
         }
+
         private void MainForm_Load(object sender, EventArgs e)
         {
             if (!CheckIBProvider())
@@ -68,6 +70,9 @@ namespace GetTopazSessionReports
 
                 if (IsOkPressed)
                     GetSessionReports();
+            } else
+            {
+                Program.logger.Trace("Завершение!");
             }
 
             IsOkPressed = false;
@@ -179,6 +184,8 @@ namespace GetTopazSessionReports
             }
             catch (Exception e)
             {
+                Program.logger.Error(e);
+
                 if (timer.Interval > 600000)
                 {
                     timer.Interval -= 600000;
