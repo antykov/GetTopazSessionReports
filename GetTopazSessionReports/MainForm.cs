@@ -7,6 +7,9 @@ using System.Windows.Forms;
 using System.Xml;
 using lcpi.data.oledb;
 using System.Runtime.InteropServices;
+using System.Net.Sockets;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace GetTopazSessionReports
 {
@@ -25,6 +28,12 @@ namespace GetTopazSessionReports
 
         bool CanClose = false;
         bool IsOkPressed = false;
+
+        #if DEBUG
+            string outputDirectory = "TopazReportsTest";
+        #else
+            string outputDirectory = "TopazReports";
+        #endif
 
         public MainForm()
         {
@@ -61,7 +70,7 @@ namespace GetTopazSessionReports
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (!CanClose)
+            if (!CanClose && e.CloseReason != CloseReason.WindowsShutDown)
             {
                 e.Cancel = true;
                 Hide();
@@ -85,6 +94,19 @@ namespace GetTopazSessionReports
             timer.Enabled = false;
 
             UpdateControls();
+        }
+
+        private void menuItemGetReportByNum_Click(object sender, EventArgs e)
+        {
+            timer.Enabled = false;
+
+            SessionNumberInputForm inputForm = new SessionNumberInputForm();
+            if (inputForm.ShowDialog() == DialogResult.OK)
+            {
+                UploadSessionReport(inputForm.sessionNum);
+            }
+
+            timer.Enabled = true;
         }
 
         private void menuItemExit_Click(object sender, EventArgs e)
@@ -120,6 +142,7 @@ namespace GetTopazSessionReports
             AppSettings.settings.StartDate = StartDate.Value;
             AppSettings.settings.StartDateLocal = StartDateLocal.Value;
             AppSettings.settings.LastSession = lastSession;
+            AppSettings.settings.ExtendedLogs = ExtendedLogs.Checked;
 
             AppSettings.SaveSettings();
 
@@ -158,10 +181,14 @@ namespace GetTopazSessionReports
             StartDate.Value = AppSettings.settings.StartDate;
             StartDateLocal.Value = AppSettings.settings.StartDateLocal;
             LastSession.Text = AppSettings.settings.LastSession.ToString();
+            ExtendedLogs.Checked = AppSettings.settings.ExtendedLogs;
         }
 
         void GetSessionReports()
         {
+            if (AppSettings.settings.ExtendedLogs)
+                Program.logger.Trace($"Запуск процесса получения сменных отчетов");
+
             try
             {
                 List<long> sessions = GetSessionsForUpload();
@@ -172,9 +199,7 @@ namespace GetTopazSessionReports
 
                 foreach (long id in sessions)
                 {
-                    string sessionReportFileName = CreateSessionReport(id);
-                    UploadSessionReportToFtp(sessionReportFileName);
-                    File.Delete(sessionReportFileName);
+                    UploadSessionReport(id);
                 }
 
                 AppSettings.settings.LastSession = sessions[sessions.Count - 1];
@@ -197,8 +222,18 @@ namespace GetTopazSessionReports
             }
         }
 
+        private void UploadSessionReport(long id)
+        {
+            string sessionReportFileName = CreateSessionReport(id);
+            UploadSessionReportToFtp(sessionReportFileName);
+            File.Delete(sessionReportFileName);
+        }
+
         private List<long> GetSessionsForUpload()
         {
+            if (AppSettings.settings.ExtendedLogs)
+                Program.logger.Trace($"Получение номеров смен для выгрузки");
+
             List<long> result = new List<long>();
 
             using (var connection = new OleDbConnection(AppSettings.connectionString))
@@ -230,6 +265,9 @@ namespace GetTopazSessionReports
 
         private string CreateSessionReport(long id)
         {
+            if (AppSettings.settings.ExtendedLogs)
+                Program.logger.Trace($"Создание файла по смене {id}");
+
             string fileName = Path.GetTempFileName();
 
             string azsCode = "", sessionDateTime = "";
@@ -430,28 +468,51 @@ namespace GetTopazSessionReports
 
         private void UploadSessionReportToFtp(string sessionReportFileName)
         {
-            FtpWebRequest ftp = (FtpWebRequest)WebRequest.Create($"ftp://{AppSettings.settings.FtpHost}{AppSettings.settings.FtpPath}TopazReports/{Path.GetFileName(sessionReportFileName)}");
+            string ftpPath = $"ftp://{AppSettings.settings.FtpHost}{AppSettings.settings.FtpPath}{outputDirectory}/{Path.GetFileName(sessionReportFileName)}";
+
+            if (AppSettings.settings.ExtendedLogs)
+                Program.logger.Trace($"Выгрузка файла {sessionReportFileName} -> {ftpPath}");
+
+            FtpWebRequest ftp = (FtpWebRequest)WebRequest.Create(ftpPath);
             ftp.Credentials = new NetworkCredential(AppSettings.settings.FtpLogin, AppSettings.settings.FtpPassword);
             ftp.Method = WebRequestMethods.Ftp.UploadFile;
 
             using (FileStream sourceStream = new FileStream(sessionReportFileName, FileMode.Open))
             {
+                if (AppSettings.settings.ExtendedLogs)
+                    Program.logger.Trace("    -> чтение локального файла");
+
                 using (Stream requestStream = ftp.GetRequestStream())
                 {
+                    if (AppSettings.settings.ExtendedLogs)
+                        Program.logger.Trace("    -> получение потока для записи на ftp");
+
                     byte[] buffer = new byte[10240];
                     int read;
 
                     while ((read = sourceStream.Read(buffer, 0, buffer.Length)) > 0)
                     {
+                        if (AppSettings.settings.ExtendedLogs)
+                            Program.logger.Trace("    -> запись части файла на ftp");
+
                         requestStream.Write(buffer, 0, read);
                     }
                 }
             }
+
+            if (AppSettings.settings.ExtendedLogs)
+                Program.logger.Trace($"Выгрузка файла {sessionReportFileName} завершена");
         }
 
         private void CheckCreateFtpDirectory()
         {
-            FtpWebRequest ftp = (FtpWebRequest)WebRequest.Create($"ftp://{AppSettings.settings.FtpHost}{AppSettings.settings.FtpPath}");
+            string ftpPath = $"ftp://{AppSettings.settings.FtpHost}{AppSettings.settings.FtpPath}";
+            string ftpDir;
+
+            if (AppSettings.settings.ExtendedLogs)
+                Program.logger.Trace($"Проверка/создание каталога {ftpPath}{outputDirectory}");
+
+            FtpWebRequest ftp = (FtpWebRequest)WebRequest.Create(ftpPath);
             ftp.Credentials = new NetworkCredential(AppSettings.settings.FtpLogin, AppSettings.settings.FtpPassword);
             ftp.Method = WebRequestMethods.Ftp.ListDirectory;
 
@@ -459,13 +520,27 @@ namespace GetTopazSessionReports
 
             using (FtpWebResponse response = (FtpWebResponse)ftp.GetResponse())
             {
+                if (AppSettings.settings.ExtendedLogs)
+                    Program.logger.Trace($"    -> чтение каталога {AppSettings.settings.FtpPath}");
+
                 using (Stream stream = response.GetResponseStream())
                 {
+                    if (AppSettings.settings.ExtendedLogs)
+                        Program.logger.Trace("    -> получение ответного потока");
+
                     using (StreamReader reader = new StreamReader(stream, true))
                     {
+                        if (AppSettings.settings.ExtendedLogs)
+                            Program.logger.Trace("    -> получение объекта чтения ответного потока");
+
                         while (!reader.EndOfStream)
                         {
-                            if (reader.ReadLine().ToUpper() == "TOPAZREPORTS")
+                            ftpDir = reader.ReadLine().ToUpper();
+
+                            if (AppSettings.settings.ExtendedLogs)
+                                Program.logger.Trace($"    -> прочитан каталог/файл {ftpDir}");
+
+                            if (ftpDir == outputDirectory.ToUpper())
                             {
                                 ftpPathExists = true;
                                 break;
@@ -478,10 +553,16 @@ namespace GetTopazSessionReports
             if (ftpPathExists)
                 return;
 
-            ftp = (FtpWebRequest)WebRequest.Create($"ftp://{AppSettings.settings.FtpHost}/{AppSettings.settings.FtpPath}TopazReports");
+            if (AppSettings.settings.ExtendedLogs)
+                Program.logger.Trace($"    -> каталог не найден, попытка создания");
+
+            ftp = (FtpWebRequest)WebRequest.Create($"{ftpPath}{outputDirectory}");
             ftp.Credentials = new NetworkCredential(AppSettings.settings.FtpLogin, AppSettings.settings.FtpPassword);
             ftp.Method = WebRequestMethods.Ftp.MakeDirectory;
             ftp.GetResponse();
+
+            if (AppSettings.settings.ExtendedLogs)
+                Program.logger.Trace($"    -> создание каталога завершено");
         }
 
         public bool CheckIBProvider()

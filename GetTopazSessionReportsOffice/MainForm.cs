@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Windows.Forms;
+using System.Xml;
 
 namespace GetTopazSessionReportsOffice
 {
@@ -13,6 +14,12 @@ namespace GetTopazSessionReportsOffice
     {
         bool CanClose = false;
         bool IsOkPressed = false;
+
+        #if DEBUG
+            string outputDirectory = "TopazReportsTest";
+        #else
+            string outputDirectory = "TopazReports";
+        #endif
 
         public MainForm()
         {
@@ -148,7 +155,7 @@ namespace GetTopazSessionReportsOffice
 
             try
             {
-                ftpFiles = ListFtpDirectory("TopazReports/")
+                ftpFiles = ListFtpDirectory($"{outputDirectory}/")
                     .Select(s => new { fileName = s, fileNameUpper = s.ToUpper() })
                     .Where(w => w.fileNameUpper.Length > 4 && w.fileNameUpper.Substring(w.fileNameUpper.Length - 4) == ".XML")
                     .Select(s => s.fileName)
@@ -165,9 +172,9 @@ namespace GetTopazSessionReportsOffice
             {
                 try
                 {
-                    DownloadFileFromFtp("TopazReports/", file, AppSettings.settings.DownloadPath);
+                    DownloadFileFromFtp($"{outputDirectory}/", file, AppSettings.settings.DownloadPath);
                     #if !DEBUG
-                        DeleteFileFromFtp("TopazReports/", file);
+                        DeleteFileFromFtp($"{outputDirectory}/", file);
                     #endif
                     Program.logger.Trace($"Скачивание файла {file} завершено!");
                 }
@@ -232,8 +239,39 @@ namespace GetTopazSessionReportsOffice
                 {
                     using (StreamReader reader = new StreamReader(responseStream, Encoding.GetEncoding(1251)))
                     {
-                        File.WriteAllText(Path.Combine(filePath, ftpFileName), reader.ReadToEnd(), Encoding.GetEncoding(1251));
+                        string fileContent = reader.ReadToEnd();
                         reader.Close();
+
+                        string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(ftpFileName);
+                        var fileParts = fileNameWithoutExtension.Split('-');
+                        if (fileParts.Length == 6 && fileParts[4].Substring(0, 3) == "AZS")
+                        {
+                            using (XmlReader xmlReader = XmlReader.Create(new StringReader(fileContent)))
+                            {
+                                if (xmlReader.MoveToContent() == XmlNodeType.Element && xmlReader.Name == "DataPaket")
+                                {
+                                    string azsName = xmlReader.GetAttribute("AZSName");
+                                    if (!String.IsNullOrWhiteSpace(azsName))
+                                    {
+                                        StringBuilder builder = new StringBuilder();
+                                        builder.Append("Отчет ");
+                                        builder.Append(fileParts[5]);
+                                        builder.Append(" от ");
+                                        builder.Append($"{fileParts[3]}.{fileParts[2]}.{fileParts[1]}");
+                                        builder.Append(" по ");
+                                        builder.Append(azsName);
+
+                                        fileNameWithoutExtension = builder.ToString();
+                                        foreach (var invalidChar in Path.GetInvalidFileNameChars())
+                                        {
+                                            fileNameWithoutExtension = fileNameWithoutExtension.Replace(invalidChar, ' ');
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        File.WriteAllText(Path.Combine(filePath, $"{fileNameWithoutExtension}.xml"), fileContent, Encoding.GetEncoding(1251));
                     }
                 }
                 response.Close();

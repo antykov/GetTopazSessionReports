@@ -34,6 +34,9 @@ namespace GetTopazSessionReports
         [XmlElement]
         public long LastSession;
 
+        [XmlElement]
+        public bool ExtendedLogs;
+
         public Settings()
         {
         }
@@ -133,7 +136,8 @@ namespace GetTopazSessionReports
                 FtpPath = "/htdocs/",
                 StartDate = new DateTime(2018, 1, 1),
                 StartDateLocal = new DateTime(2018, 1, 1),
-                LastSession = 0
+                LastSession = 0,
+                ExtendedLogs = false
             };
 
             using (XmlWriter xmlWriter = XmlWriter.Create(settingsFilePath, xmlWriterSettings))

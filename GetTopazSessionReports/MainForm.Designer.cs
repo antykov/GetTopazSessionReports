@@ -43,6 +43,8 @@
             this.labelFirebirdUserName = new System.Windows.Forms.Label();
             this.FirebirdUserName = new System.Windows.Forms.TextBox();
             this.groupBoxFtp = new System.Windows.Forms.GroupBox();
+            this.labelFtpPath = new System.Windows.Forms.Label();
+            this.FtpPath = new System.Windows.Forms.TextBox();
             this.labelFtpPassword = new System.Windows.Forms.Label();
             this.FtpPassword = new System.Windows.Forms.TextBox();
             this.labelFtpLogin = new System.Windows.Forms.Label();
@@ -58,8 +60,8 @@
             this.timer = new System.Windows.Forms.Timer(this.components);
             this.StartDateLocal = new System.Windows.Forms.DateTimePicker();
             this.labelstartDateLocal = new System.Windows.Forms.Label();
-            this.labelFtpPath = new System.Windows.Forms.Label();
-            this.FtpPath = new System.Windows.Forms.TextBox();
+            this.ExtendedLogs = new System.Windows.Forms.CheckBox();
+            this.menuItemGetReportByNum = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuNotifyIcon.SuspendLayout();
             this.groupBoxFirebird.SuspendLayout();
             this.groupBoxFtp.SuspendLayout();
@@ -76,14 +78,15 @@
             // contextMenuNotifyIcon
             // 
             this.contextMenuNotifyIcon.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuItemGetReportByNum,
             this.menuItemExit});
             this.contextMenuNotifyIcon.Name = "contextMenuNotifyIcon";
-            this.contextMenuNotifyIcon.Size = new System.Drawing.Size(187, 26);
+            this.contextMenuNotifyIcon.Size = new System.Drawing.Size(290, 70);
             // 
             // menuItemExit
             // 
             this.menuItemExit.Name = "menuItemExit";
-            this.menuItemExit.Size = new System.Drawing.Size(186, 22);
+            this.menuItemExit.Size = new System.Drawing.Size(289, 22);
             this.menuItemExit.Text = "Закрыть программу";
             this.menuItemExit.Click += new System.EventHandler(this.menuItemExit_Click);
             // 
@@ -179,12 +182,28 @@
             this.groupBoxFtp.Controls.Add(this.FtpLogin);
             this.groupBoxFtp.Controls.Add(this.labelFtpHost);
             this.groupBoxFtp.Controls.Add(this.FtpHost);
-            this.groupBoxFtp.Location = new System.Drawing.Point(12, 94);
+            this.groupBoxFtp.Location = new System.Drawing.Point(12, 92);
             this.groupBoxFtp.Name = "groupBoxFtp";
             this.groupBoxFtp.Size = new System.Drawing.Size(489, 76);
             this.groupBoxFtp.TabIndex = 4;
             this.groupBoxFtp.TabStop = false;
             this.groupBoxFtp.Text = "Настройка Ftp";
+            // 
+            // labelFtpPath
+            // 
+            this.labelFtpPath.AutoSize = true;
+            this.labelFtpPath.Location = new System.Drawing.Point(6, 49);
+            this.labelFtpPath.Name = "labelFtpPath";
+            this.labelFtpPath.Size = new System.Drawing.Size(51, 13);
+            this.labelFtpPath.TabIndex = 14;
+            this.labelFtpPath.Text = "Каталог:";
+            // 
+            // FtpPath
+            // 
+            this.FtpPath.Location = new System.Drawing.Point(89, 46);
+            this.FtpPath.Name = "FtpPath";
+            this.FtpPath.Size = new System.Drawing.Size(388, 20);
+            this.FtpPath.TabIndex = 13;
             // 
             // labelFtpPassword
             // 
@@ -238,15 +257,15 @@
             // labelStartDate
             // 
             this.labelStartDate.AutoSize = true;
-            this.labelStartDate.Location = new System.Drawing.Point(18, 180);
+            this.labelStartDate.Location = new System.Drawing.Point(98, 173);
             this.labelStartDate.Name = "labelStartDate";
-            this.labelStartDate.Size = new System.Drawing.Size(58, 13);
+            this.labelStartDate.Size = new System.Drawing.Size(91, 13);
             this.labelStartDate.TabIndex = 10;
-            this.labelStartDate.Text = "Нач. дата:";
+            this.labelStartDate.Text = "Начальная дата:";
             // 
             // StartDate
             // 
-            this.StartDate.Location = new System.Drawing.Point(101, 177);
+            this.StartDate.Location = new System.Drawing.Point(101, 189);
             this.StartDate.Name = "StartDate";
             this.StartDate.Size = new System.Drawing.Size(121, 20);
             this.StartDate.TabIndex = 11;
@@ -254,15 +273,15 @@
             // labelLastSession
             // 
             this.labelLastSession.AutoSize = true;
-            this.labelLastSession.Location = new System.Drawing.Point(18, 206);
+            this.labelLastSession.Location = new System.Drawing.Point(365, 173);
             this.labelLastSession.Name = "labelLastSession";
-            this.labelLastSession.Size = new System.Drawing.Size(74, 13);
+            this.labelLastSession.Size = new System.Drawing.Size(129, 13);
             this.labelLastSession.TabIndex = 13;
-            this.labelLastSession.Text = "Выгр. смена:";
+            this.labelLastSession.Text = "№ выгруженной смены:";
             // 
             // LastSession
             // 
-            this.LastSession.Location = new System.Drawing.Point(101, 203);
+            this.LastSession.Location = new System.Drawing.Point(368, 189);
             this.LastSession.Name = "LastSession";
             this.LastSession.Size = new System.Drawing.Size(121, 20);
             this.LastSession.TabIndex = 12;
@@ -270,7 +289,7 @@
             // buttonOk
             // 
             this.buttonOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.buttonOk.Location = new System.Drawing.Point(345, 225);
+            this.buttonOk.Location = new System.Drawing.Point(346, 238);
             this.buttonOk.Name = "buttonOk";
             this.buttonOk.Size = new System.Drawing.Size(75, 23);
             this.buttonOk.TabIndex = 14;
@@ -281,7 +300,7 @@
             // buttonCancel
             // 
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(426, 225);
+            this.buttonCancel.Location = new System.Drawing.Point(427, 238);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
             this.buttonCancel.TabIndex = 15;
@@ -296,7 +315,7 @@
             // 
             // StartDateLocal
             // 
-            this.StartDateLocal.Location = new System.Drawing.Point(300, 177);
+            this.StartDateLocal.Location = new System.Drawing.Point(233, 189);
             this.StartDateLocal.Name = "StartDateLocal";
             this.StartDateLocal.Size = new System.Drawing.Size(121, 20);
             this.StartDateLocal.TabIndex = 17;
@@ -304,33 +323,36 @@
             // labelstartDateLocal
             // 
             this.labelstartDateLocal.AutoSize = true;
-            this.labelstartDateLocal.Location = new System.Drawing.Point(230, 175);
+            this.labelstartDateLocal.Location = new System.Drawing.Point(230, 173);
             this.labelstartDateLocal.Name = "labelstartDateLocal";
-            this.labelstartDateLocal.Size = new System.Drawing.Size(64, 26);
+            this.labelstartDateLocal.Size = new System.Drawing.Size(115, 13);
             this.labelstartDateLocal.TabIndex = 16;
-            this.labelstartDateLocal.Text = "Нач. дата\r\nлокальная:";
+            this.labelstartDateLocal.Text = "Нач. дата локальная:";
             // 
-            // labelFtpPath
+            // ExtendedLogs
             // 
-            this.labelFtpPath.AutoSize = true;
-            this.labelFtpPath.Location = new System.Drawing.Point(6, 49);
-            this.labelFtpPath.Name = "labelFtpPath";
-            this.labelFtpPath.Size = new System.Drawing.Size(51, 13);
-            this.labelFtpPath.TabIndex = 14;
-            this.labelFtpPath.Text = "Каталог:";
+            this.ExtendedLogs.AutoSize = true;
+            this.ExtendedLogs.Location = new System.Drawing.Point(326, 215);
+            this.ExtendedLogs.Name = "ExtendedLogs";
+            this.ExtendedLogs.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.ExtendedLogs.Size = new System.Drawing.Size(163, 17);
+            this.ExtendedLogs.TabIndex = 18;
+            this.ExtendedLogs.Text = "Расширенное логирование";
+            this.ExtendedLogs.UseVisualStyleBackColor = true;
             // 
-            // FtpPath
+            // menuItemGetReportByNum
             // 
-            this.FtpPath.Location = new System.Drawing.Point(89, 46);
-            this.FtpPath.Name = "FtpPath";
-            this.FtpPath.Size = new System.Drawing.Size(388, 20);
-            this.FtpPath.TabIndex = 13;
+            this.menuItemGetReportByNum.Name = "menuItemGetReportByNum";
+            this.menuItemGetReportByNum.Size = new System.Drawing.Size(289, 22);
+            this.menuItemGetReportByNum.Text = "Выгрузить сменный отчет по номеру...";
+            this.menuItemGetReportByNum.Click += new System.EventHandler(this.menuItemGetReportByNum_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(514, 254);
+            this.ClientSize = new System.Drawing.Size(514, 270);
+            this.Controls.Add(this.ExtendedLogs);
             this.Controls.Add(this.StartDateLocal);
             this.Controls.Add(this.labelstartDateLocal);
             this.Controls.Add(this.buttonCancel);
@@ -391,6 +413,8 @@
         private System.Windows.Forms.TextBox FtpPath;
         private System.Windows.Forms.DateTimePicker StartDateLocal;
         private System.Windows.Forms.Label labelstartDateLocal;
+        private System.Windows.Forms.CheckBox ExtendedLogs;
+        private System.Windows.Forms.ToolStripMenuItem menuItemGetReportByNum;
     }
 }
 
