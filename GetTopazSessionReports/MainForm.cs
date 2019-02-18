@@ -224,6 +224,9 @@ namespace GetTopazSessionReports
 
         private void UploadSessionReport(long id)
         {
+            if (AppSettings.settings.ExtendedLogs)
+                Program.logger.Trace($"Начало выгрузки смены {id}");
+
             string sessionReportFileName = CreateSessionReport(id);
             UploadSessionReportToFtp(sessionReportFileName);
             File.Delete(sessionReportFileName);
@@ -305,6 +308,9 @@ namespace GetTopazSessionReports
 
         private void WriteSessionInfo(XmlWriter writer, OleDbConnection connection, long id, out string azsCode, out string sessionDateTime)
         {
+            if (AppSettings.settings.ExtendedLogs)
+                Program.logger.Trace($"Запись файла id = {id}: информация по смене");
+
             string sql =
                 @"SELECT ""sysSessions"".""SessionNum"", ""sysSessions"".""UserName"", 
                          ""sysSessions"".""StartDateTime"", ""sysSessions"".""EndDateTime"",
@@ -329,8 +335,13 @@ namespace GetTopazSessionReports
 
                 DateTime startDateTimeLocal = (DateTime)(reader.GetValue(2));
                 DateTime startDateTime = startDateTimeLocal + (AppSettings.settings.StartDate - AppSettings.settings.StartDateLocal);
-                DateTime endDateTimeLocal = (DateTime)(reader.GetValue(3));
-                DateTime endDateTime = endDateTimeLocal + (AppSettings.settings.StartDate - AppSettings.settings.StartDateLocal);
+                DateTime endDateTimeLocal = DateTime.MinValue, endDateTime = DateTime.MinValue;
+                bool isOpenSession = reader.IsDBNull(3);
+                if (!isOpenSession)
+                {
+                    endDateTimeLocal = (DateTime)(reader.GetValue(3));
+                    endDateTime = endDateTimeLocal + (AppSettings.settings.StartDate - AppSettings.settings.StartDateLocal);
+                }
                 sessionDateTime = startDateTime.ToString("yyyy-MM-dd");
 
                 writer.WriteStartElement("DataPaket");
@@ -341,16 +352,22 @@ namespace GetTopazSessionReports
 
                 writer.WriteStartElement("Session");
                 writer.WriteAttributeString("UserName", reader.GetValue(1).ToString());
-                writer.WriteAttributeString("StartDateTime", startDateTime.ToString("dd.MM.yyyy hh:mm:ss"));
-                writer.WriteAttributeString("StartDateTimeLocal", startDateTimeLocal.ToString("dd.MM.yyyy hh:mm:ss"));
-                writer.WriteAttributeString("EndDateTime", endDateTime.ToString("dd.MM.yyyy hh:mm:ss"));
-                writer.WriteAttributeString("EndDateTimeLocal", endDateTimeLocal.ToString("dd.MM.yyyy hh:mm:ss"));
+                writer.WriteAttributeString("StartDateTime", startDateTime.ToString("dd.MM.yyyy HH:mm:ss"));
+                writer.WriteAttributeString("StartDateTimeLocal", startDateTimeLocal.ToString("dd.MM.yyyy HH:mm:ss"));
+                if (!isOpenSession)
+                {
+                    writer.WriteAttributeString("EndDateTime", endDateTime.ToString("dd.MM.yyyy HH:mm:ss"));
+                    writer.WriteAttributeString("EndDateTimeLocal", endDateTimeLocal.ToString("dd.MM.yyyy HH:mm:ss"));
+                }
                 writer.WriteAttributeString("SessionNum", reader.GetValue(0).ToString());
             }
         }
 
         private void WriteTanksInfo(XmlWriter writer, OleDbConnection connection, long id)
         {
+            if (AppSettings.settings.ExtendedLogs)
+                Program.logger.Trace($"Запись файла id = {id}: информация по емкостям");
+
             string sql =
                 @"SELECT ""flSesTanks"".""TankNum"", ""flSesTanks"".""FuelName"", 
                          ""flSesTanks"".""StartFuelVolume"", ""flSesTanks"".""ReceptVolume"",
@@ -382,6 +399,9 @@ namespace GetTopazSessionReports
 
         private void WriteHosesInfo(XmlWriter writer, OleDbConnection connection, long id)
         {
+            if (AppSettings.settings.ExtendedLogs)
+                Program.logger.Trace($"Запись файла id = {id}: информация по рукавам");
+
             string sql =
                 @"SELECT '1' AS ""HoseType"", ""FuelName"", ""dcHoses"".""Num"" AS ""HoseNum"",
                          ""flSesHoses"".""PumpNum"", ""flSesHoses"".""NumInPump"",  
@@ -417,6 +437,9 @@ namespace GetTopazSessionReports
 
         private void WriteOrders(XmlWriter writer, OleDbConnection connection, long id)
         {
+            if (AppSettings.settings.ExtendedLogs)
+                Program.logger.Trace($"Запись файла id = {id}: продажи");
+
             string sql =
                 @"SELECT ""flOrders"".""DateTime"", 
                          ""dcTanks"".""Num"" AS ""TankNum"", 
@@ -436,7 +459,7 @@ namespace GetTopazSessionReports
                   LEFT JOIN ""rgLimits"" ON ""rgLimits"".""DocID"" = ""flOrders"".""OrderID""
                   LEFT JOIN ""dcPartners"" ON ""dcPartners"".""PartnerID"" = ""rgLimits"".""PartnerID""
                   LEFT JOIN ""dcAgents"" ON ""dcAgents"".""AgentID"" = ""rgLimits"".""AgentID""
-                  WHERE ""flOrders"".""SessionID"" = @id AND ""flOrders"".""Volume"" <> 0 AND ""flOrders"".""Amount"" <> 0";
+                  WHERE ""flOrders"".""SessionID"" = @id AND ""flOrders"".""Volume"" <> 0";
 
             var query = new OleDbCommand(sql, connection);
             query["id"].Value = id;
@@ -448,7 +471,7 @@ namespace GetTopazSessionReports
                 while (reader.Read())
                 {
                     writer.WriteStartElement("OutcomeByRetail");
-                    writer.WriteAttributeString("DateTime", ((DateTime)(reader.GetValue(0))).ToString("dd.MM.yyyy hh:mm:ss"));
+                    writer.WriteAttributeString("DateTime", ((DateTime)(reader.GetValue(0))).ToString("dd.MM.yyyy HH:mm:ss"));
                     writer.WriteAttributeString("TankNum", reader.GetValue(1).ToString());
                     writer.WriteAttributeString("HoseName", reader.GetValue(2).ToString());
                     writer.WriteAttributeString("FuelName", reader.GetValue(3).ToString());
@@ -567,6 +590,9 @@ namespace GetTopazSessionReports
 
         public bool CheckIBProvider()
         {
+            if (AppSettings.settings.ExtendedLogs)
+                Program.logger.Trace($"Проверка наличия библиотеки lcpi.ibprovider_v3_vc12xp_w32_free_i.dll");
+
             if (Type.GetTypeFromProgID("LCPI.IBProvider.3.Free") == null)
             {
                 string dllPath = Path.Combine(Environment.CurrentDirectory, "lcpi.ibprovider_v3_vc12xp_w32_free_i.dll");
