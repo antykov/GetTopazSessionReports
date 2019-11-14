@@ -31,6 +31,8 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.groupBoxFtp = new System.Windows.Forms.GroupBox();
+            this.labelFtpPath = new System.Windows.Forms.Label();
+            this.FtpPath = new System.Windows.Forms.TextBox();
             this.labelFtpPassword = new System.Windows.Forms.Label();
             this.FtpPassword = new System.Windows.Forms.TextBox();
             this.labelFtpLogin = new System.Windows.Forms.Label();
@@ -48,10 +50,16 @@
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.buttonSelectFolder = new System.Windows.Forms.Button();
-            this.labelFtpPath = new System.Windows.Forms.Label();
-            this.FtpPath = new System.Windows.Forms.TextBox();
+            this.groupBoxAZSRestrictions = new System.Windows.Forms.GroupBox();
+            this.labelAZSCodes = new System.Windows.Forms.Label();
+            this.AZSCodes = new System.Windows.Forms.TextBox();
+            this.labelAZSCodesExclude = new System.Windows.Forms.Label();
+            this.AZSCodesExclude = new System.Windows.Forms.TextBox();
+            this.buttonAutoStart = new System.Windows.Forms.Button();
+            this.labelAutoStartDisabled = new System.Windows.Forms.Label();
             this.groupBoxFtp.SuspendLayout();
             this.contextMenuNotifyIcon.SuspendLayout();
+            this.groupBoxAZSRestrictions.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBoxFtp
@@ -70,6 +78,22 @@
             this.groupBoxFtp.TabIndex = 5;
             this.groupBoxFtp.TabStop = false;
             this.groupBoxFtp.Text = "Настройка Ftp";
+            // 
+            // labelFtpPath
+            // 
+            this.labelFtpPath.AutoSize = true;
+            this.labelFtpPath.Location = new System.Drawing.Point(6, 48);
+            this.labelFtpPath.Name = "labelFtpPath";
+            this.labelFtpPath.Size = new System.Drawing.Size(51, 13);
+            this.labelFtpPath.TabIndex = 14;
+            this.labelFtpPath.Text = "Каталог:";
+            // 
+            // FtpPath
+            // 
+            this.FtpPath.Location = new System.Drawing.Point(88, 45);
+            this.FtpPath.Name = "FtpPath";
+            this.FtpPath.Size = new System.Drawing.Size(388, 20);
+            this.FtpPath.TabIndex = 13;
             // 
             // labelFtpPassword
             // 
@@ -123,16 +147,16 @@
             // labelDownloadPath
             // 
             this.labelDownloadPath.AutoSize = true;
-            this.labelDownloadPath.Location = new System.Drawing.Point(18, 99);
+            this.labelDownloadPath.Location = new System.Drawing.Point(18, 175);
             this.labelDownloadPath.Name = "labelDownloadPath";
-            this.labelDownloadPath.Size = new System.Drawing.Size(51, 13);
+            this.labelDownloadPath.Size = new System.Drawing.Size(56, 26);
             this.labelDownloadPath.TabIndex = 10;
-            this.labelDownloadPath.Text = "Каталог:";
+            this.labelDownloadPath.Text = "Каталог\r\nзагрузки:";
             // 
             // DownloadPath
             // 
             this.DownloadPath.Enabled = false;
-            this.DownloadPath.Location = new System.Drawing.Point(101, 96);
+            this.DownloadPath.Location = new System.Drawing.Point(100, 178);
             this.DownloadPath.Name = "DownloadPath";
             this.DownloadPath.Size = new System.Drawing.Size(376, 20);
             this.DownloadPath.TabIndex = 9;
@@ -140,7 +164,7 @@
             // buttonCancel
             // 
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(426, 122);
+            this.buttonCancel.Location = new System.Drawing.Point(426, 209);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
             this.buttonCancel.TabIndex = 17;
@@ -151,7 +175,7 @@
             // buttonOk
             // 
             this.buttonOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.buttonOk.Location = new System.Drawing.Point(345, 122);
+            this.buttonOk.Location = new System.Drawing.Point(345, 209);
             this.buttonOk.Name = "buttonOk";
             this.buttonOk.Size = new System.Drawing.Size(75, 23);
             this.buttonOk.TabIndex = 16;
@@ -196,7 +220,7 @@
             // 
             // buttonSelectFolder
             // 
-            this.buttonSelectFolder.Location = new System.Drawing.Point(477, 95);
+            this.buttonSelectFolder.Location = new System.Drawing.Point(476, 177);
             this.buttonSelectFolder.Name = "buttonSelectFolder";
             this.buttonSelectFolder.Size = new System.Drawing.Size(24, 22);
             this.buttonSelectFolder.TabIndex = 18;
@@ -204,27 +228,80 @@
             this.buttonSelectFolder.UseVisualStyleBackColor = true;
             this.buttonSelectFolder.Click += new System.EventHandler(this.buttonSelectFolder_Click);
             // 
-            // labelFtpPath
+            // groupBoxAZSRestrictions
             // 
-            this.labelFtpPath.AutoSize = true;
-            this.labelFtpPath.Location = new System.Drawing.Point(6, 50);
-            this.labelFtpPath.Name = "labelFtpPath";
-            this.labelFtpPath.Size = new System.Drawing.Size(51, 13);
-            this.labelFtpPath.TabIndex = 14;
-            this.labelFtpPath.Text = "Каталог:";
+            this.groupBoxAZSRestrictions.Controls.Add(this.labelAZSCodesExclude);
+            this.groupBoxAZSRestrictions.Controls.Add(this.AZSCodesExclude);
+            this.groupBoxAZSRestrictions.Controls.Add(this.labelAZSCodes);
+            this.groupBoxAZSRestrictions.Controls.Add(this.AZSCodes);
+            this.groupBoxAZSRestrictions.Location = new System.Drawing.Point(12, 95);
+            this.groupBoxAZSRestrictions.Name = "groupBoxAZSRestrictions";
+            this.groupBoxAZSRestrictions.Size = new System.Drawing.Size(489, 77);
+            this.groupBoxAZSRestrictions.TabIndex = 19;
+            this.groupBoxAZSRestrictions.TabStop = false;
+            this.groupBoxAZSRestrictions.Text = "Ограничения по АЗС (коды АЗС через запятую)";
             // 
-            // FtpPath
+            // labelAZSCodes
             // 
-            this.FtpPath.Location = new System.Drawing.Point(89, 47);
-            this.FtpPath.Name = "FtpPath";
-            this.FtpPath.Size = new System.Drawing.Size(388, 20);
-            this.FtpPath.TabIndex = 13;
+            this.labelAZSCodes.AutoSize = true;
+            this.labelAZSCodes.Location = new System.Drawing.Point(6, 22);
+            this.labelAZSCodes.Name = "labelAZSCodes";
+            this.labelAZSCodes.Size = new System.Drawing.Size(288, 13);
+            this.labelAZSCodes.TabIndex = 10;
+            this.labelAZSCodes.Text = "Загружать сменные отчеты только по указанным АЗС:";
+            // 
+            // AZSCodes
+            // 
+            this.AZSCodes.Location = new System.Drawing.Point(300, 19);
+            this.AZSCodes.Name = "AZSCodes";
+            this.AZSCodes.Size = new System.Drawing.Size(176, 20);
+            this.AZSCodes.TabIndex = 9;
+            // 
+            // labelAZSCodesExclude
+            // 
+            this.labelAZSCodesExclude.AutoSize = true;
+            this.labelAZSCodesExclude.Location = new System.Drawing.Point(6, 48);
+            this.labelAZSCodesExclude.Name = "labelAZSCodesExclude";
+            this.labelAZSCodesExclude.Size = new System.Drawing.Size(267, 13);
+            this.labelAZSCodesExclude.TabIndex = 12;
+            this.labelAZSCodesExclude.Text = "Загружать сменные отчеты кроме указанных АЗС:";
+            // 
+            // AZSCodesExclude
+            // 
+            this.AZSCodesExclude.Location = new System.Drawing.Point(300, 45);
+            this.AZSCodesExclude.Name = "AZSCodesExclude";
+            this.AZSCodesExclude.Size = new System.Drawing.Size(176, 20);
+            this.AZSCodesExclude.TabIndex = 11;
+            // 
+            // buttonAutoStart
+            // 
+            this.buttonAutoStart.Location = new System.Drawing.Point(177, 209);
+            this.buttonAutoStart.Name = "buttonAutoStart";
+            this.buttonAutoStart.Size = new System.Drawing.Size(162, 23);
+            this.buttonAutoStart.TabIndex = 20;
+            this.buttonAutoStart.Text = "АВТОСТАРТ";
+            this.buttonAutoStart.UseVisualStyleBackColor = true;
+            this.buttonAutoStart.Click += new System.EventHandler(this.buttonAutoStart_Click);
+            // 
+            // labelAutoStartDisabled
+            // 
+            this.labelAutoStartDisabled.AutoSize = true;
+            this.labelAutoStartDisabled.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.labelAutoStartDisabled.ForeColor = System.Drawing.Color.Red;
+            this.labelAutoStartDisabled.Location = new System.Drawing.Point(9, 205);
+            this.labelAutoStartDisabled.Name = "labelAutoStartDisabled";
+            this.labelAutoStartDisabled.Size = new System.Drawing.Size(297, 30);
+            this.labelAutoStartDisabled.TabIndex = 21;
+            this.labelAutoStartDisabled.Text = "Для добавления / удаления из автозапуска\r\nзапустите с правами администратора";
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(510, 151);
+            this.ClientSize = new System.Drawing.Size(510, 240);
+            this.Controls.Add(this.labelAutoStartDisabled);
+            this.Controls.Add(this.buttonAutoStart);
+            this.Controls.Add(this.groupBoxAZSRestrictions);
             this.Controls.Add(this.buttonSelectFolder);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonOk);
@@ -241,6 +318,8 @@
             this.groupBoxFtp.ResumeLayout(false);
             this.groupBoxFtp.PerformLayout();
             this.contextMenuNotifyIcon.ResumeLayout(false);
+            this.groupBoxAZSRestrictions.ResumeLayout(false);
+            this.groupBoxAZSRestrictions.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -268,6 +347,13 @@
         private System.Windows.Forms.Button buttonSelectFolder;
         private System.Windows.Forms.Label labelFtpPath;
         private System.Windows.Forms.TextBox FtpPath;
+        private System.Windows.Forms.GroupBox groupBoxAZSRestrictions;
+        private System.Windows.Forms.Label labelAZSCodesExclude;
+        private System.Windows.Forms.TextBox AZSCodesExclude;
+        private System.Windows.Forms.Label labelAZSCodes;
+        private System.Windows.Forms.TextBox AZSCodes;
+        private System.Windows.Forms.Button buttonAutoStart;
+        private System.Windows.Forms.Label labelAutoStartDisabled;
     }
 }
 

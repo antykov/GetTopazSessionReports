@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -63,7 +64,7 @@ namespace GetTopazSessionReports
 
         public static void LoadSettings()
         {
-            string settingsFilePath = Path.Combine(Environment.CurrentDirectory, "settings.xml");
+            string settingsFilePath = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "settings.xml");
             if (!File.Exists(settingsFilePath))
             {
                 CreateTemplateSettingsFile(settingsFilePath);
@@ -78,7 +79,7 @@ namespace GetTopazSessionReports
 
         public static void SaveSettings()
         {
-            string settingsFilePath = Path.Combine(Environment.CurrentDirectory, "settings.xml");
+            string settingsFilePath = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "settings.xml");
 
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(Settings));
 

@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Net.Sockets;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 namespace GetTopazSessionReports
 {
@@ -595,7 +596,7 @@ namespace GetTopazSessionReports
 
             if (Type.GetTypeFromProgID("LCPI.IBProvider.3.Free") == null)
             {
-                string dllPath = Path.Combine(Environment.CurrentDirectory, "lcpi.ibprovider_v3_vc12xp_w32_free_i.dll");
+                string dllPath = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "lcpi.ibprovider_v3_vc12xp_w32_free_i.dll");
                 if (!File.Exists(dllPath))
                 {
                     MessageBox.Show("Отсутствует библиотека lcpi.ibprovider_v3_vc12xp_w32_free_i.dll!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);

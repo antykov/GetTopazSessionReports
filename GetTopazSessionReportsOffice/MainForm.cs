@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -31,6 +32,8 @@ namespace GetTopazSessionReportsOffice
         private void MainForm_Load(object sender, EventArgs e)
         {
             AppSettings.LoadSettings();
+
+            CheckAutoStart();
 
             if (!AppSettings.CheckSettings() || AppSettings.isCreated)
             {
@@ -102,6 +105,8 @@ namespace GetTopazSessionReportsOffice
             AppSettings.settings.FtpPassword = FtpPassword.Text;
             AppSettings.settings.FtpPath = FtpPath.Text;
             AppSettings.settings.DownloadPath = DownloadPath.Text;
+            AppSettings.settings.AZSCodes = AZSCodes.Text;
+            AppSettings.settings.AZSCodesExclude = AZSCodesExclude.Text;
 
             AppSettings.SaveSettings();
 
@@ -115,6 +120,22 @@ namespace GetTopazSessionReportsOffice
         private void buttonCancel_Click(object sender, EventArgs e)
         {
             Close();
+        }
+
+        private void buttonAutoStart_Click(object sender, EventArgs e)
+        {
+            RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
+            if (key.GetValue("GetTopazSessionReportsOffice") == null)
+            {
+                key.SetValue("GetTopazSessionReportsOffice", System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
+            }
+            else
+            {
+                key.DeleteValue("GetTopazSessionReportsOffice");
+            }
+            key.Close();
+
+            CheckAutoStart();
         }
 
         private void timer_Tick(object sender, EventArgs e)
@@ -143,6 +164,8 @@ namespace GetTopazSessionReportsOffice
             FtpPassword.Text = AppSettings.settings.FtpPassword;
             FtpPath.Text = AppSettings.settings.FtpPath;
             DownloadPath.Text = AppSettings.settings.DownloadPath;
+            AZSCodes.Text = AppSettings.settings.AZSCodes;
+            AZSCodesExclude.Text = AppSettings.settings.AZSCodesExclude;
         }
 
         private bool GetSessionReports()
@@ -172,6 +195,12 @@ namespace GetTopazSessionReportsOffice
             {
                 try
                 {
+                    if (!CheckFileForAZSRestrictions(file))
+                    {
+                        Program.logger.Trace($"Файл {file} не обрабатывается согласно ограничениям!");
+                        continue;
+                    }
+
                     DownloadFileFromFtp($"{outputDirectory}/", file, AppSettings.settings.DownloadPath);
                     #if !DEBUG
                         DeleteFileFromFtp($"{outputDirectory}/", file);
@@ -187,6 +216,33 @@ namespace GetTopazSessionReportsOffice
             }
 
             return result;
+        }
+
+        private bool CheckFileForAZSRestrictions(string file)
+        {
+            string azsCode;
+
+            var fileParts = file.Split('-');
+            if (fileParts.Length == 6 && fileParts[4].Substring(0, 3) == "AZS")
+                azsCode = new string(fileParts[4].Replace("AZS", "").ToCharArray().SkipWhile(c => c == '0').ToArray());
+            else
+                return true;
+
+            if (!String.IsNullOrWhiteSpace(AppSettings.settings.AZSCodes)) {
+                if (AppSettings.settings.AZSCodes.Split(',').Where(s => s == azsCode).FirstOrDefault() == null)
+                    return false;
+                else
+                    return true;
+            }
+
+            if (!String.IsNullOrWhiteSpace(AppSettings.settings.AZSCodesExclude)) {
+                if (AppSettings.settings.AZSCodesExclude.Split(',').Where(s => s == azsCode).FirstOrDefault() == null)
+                    return true;
+                else
+                    return false;
+            }
+
+            return true;
         }
 
         private List<string> ListFtpDirectory(string ftpPath)
@@ -295,6 +351,37 @@ namespace GetTopazSessionReportsOffice
             {
                 response.Close();
             }
+        }
+
+        private void CheckAutoStart()
+        {
+            System.Security.Principal.WindowsIdentity id = System.Security.Principal.WindowsIdentity.GetCurrent();
+            System.Security.Principal.WindowsPrincipal p = new System.Security.Principal.WindowsPrincipal(id);
+
+            bool IsAdministrator = p.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
+
+            try
+                {
+                RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run");
+                if (key.GetValue("GetTopazSessionReportsOffice") == null)
+                {
+                    buttonAutoStart.Text = "Добавить в автозапуск";
+                    labelAutoStartDisabled.Text = "Для добавления в автозапуск\nзапустите с правами администратора";
+                }
+                else
+                {
+                    buttonAutoStart.Text = "Удалить из автозапуска";
+                    labelAutoStartDisabled.Text = "Для удаления из автозапуска\nзапустите с правами администратора";
+                }
+                key.Close();
+            }
+            catch
+            {
+                labelAutoStartDisabled.Text = "Для добавления / удаления из автозапуска\nзапустите с правами администратора";
+            }
+
+            buttonAutoStart.Visible = IsAdministrator;
+            labelAutoStartDisabled.Visible = !IsAdministrator;
         }
     }
 }

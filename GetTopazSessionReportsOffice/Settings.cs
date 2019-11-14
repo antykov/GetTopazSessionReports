@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -21,6 +22,12 @@ namespace GetTopazSessionReportsOffice
         [XmlElement]
         public string DownloadPath;
 
+        [XmlElement]
+        public string AZSCodes;
+        [XmlElement]
+        public string AZSCodesExclude;
+
+
         public Settings()
         {
         }
@@ -33,7 +40,7 @@ namespace GetTopazSessionReportsOffice
 
         public static void LoadSettings()
         {
-            string settingsFilePath = Path.Combine(Environment.CurrentDirectory, "settings.xml");
+            string settingsFilePath = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "settings.xml");
             if (!File.Exists(settingsFilePath))
             {
                 CreateTemplateSettingsFile(settingsFilePath);
@@ -48,7 +55,7 @@ namespace GetTopazSessionReportsOffice
 
         public static void SaveSettings()
         {
-            string settingsFilePath = Path.Combine(Environment.CurrentDirectory, "settings.xml");
+            string settingsFilePath = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "settings.xml");
 
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(Settings));
 
@@ -88,11 +95,13 @@ namespace GetTopazSessionReportsOffice
 
             Settings templateSettings = new Settings
             {
-                FtpHost = "ftp.byethost10.com",
-                FtpLogin = "b10_21356595",
-                FtpPassword = "Tuypeor2017ihv",
-                FtpPath = "/htdocs/",
-                DownloadPath = Environment.CurrentDirectory
+                FtpHost = "ftp.com",
+                FtpLogin = "логин",
+                FtpPassword = "пароль",
+                FtpPath = "/",
+                DownloadPath = Environment.CurrentDirectory,
+                AZSCodes = "",
+                AZSCodesExclude = ""
             };
 
             using (XmlWriter xmlWriter = XmlWriter.Create(settingsFilePath, xmlWriterSettings))
